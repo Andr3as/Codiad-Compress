@@ -15,7 +15,7 @@
     
     switch($_GET['action']) {
         
-        case 'tidyFile':
+        case 'compressCSS':
             if (isset($_GET['path']) && isset($_POST['advanced'])) {
                 $path = $localPath . $_GET['path'];
                 $css_code = file_get_contents($path);
@@ -35,6 +35,26 @@
                 $nFile = $nFile . ".min.css";
                 file_put_contents($nFile, $code);
                 echo '{"status":"success","message":"CSS tidied!"}';
+            } else {
+                echo '{"status":"error","message":"Missing Parameter!"}';
+            }
+            break;
+            
+        case 'compressJS':
+            if (isset($_GET['path']) && isset($_POST['code'])) {
+                $path   = $localPath . $_GET['path'];
+                $nFile  = substr($path, 0, strrpos($path, ".js"));
+                $nFile  = $nFile . ".min.js";
+                file_put_contents($nFile, $_POST['code']);
+                echo '{"status":"success","message":"JS minified!"}';
+            } else {
+                echo '{"status":"error","message":"Missing Parameter!"}';
+            }
+            break;
+            
+        case 'getContent':
+            if (isset($_GET['path'])) {
+                echo file_get_contents($localPath.$_GET['path']);
             } else {
                 echo '{"status":"error","message":"Missing Parameter!"}';
             }

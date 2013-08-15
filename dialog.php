@@ -60,8 +60,8 @@
     <button onclick="codiad.Compress.tidy(); return false;">Compress</button>
     <button onclick="codiad.modal.unload(); return false;">Close</button>
     <script>
-        console.log($('#compress_form').ready(function(){
+        $('#compress_form').ready(function(){
             $('#compress_settings').hide();
-        }));
+        });
     </script>
 </form>

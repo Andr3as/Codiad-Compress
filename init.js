@@ -6,9 +6,9 @@
 
 (function(global, $){
 
-    var codiad = global.codiad,
-        scripts= document.getElementsByTagName('script'),
-        path = scripts[scripts.length-1].src.split('?')[0],
+    //var codiad  = global.codiad,
+    var scripts = document.getElementsByTagName('script'),
+        path    = scripts[scripts.length-1].src.split('?')[0],
         curpath = path.split('/').slice(0, -1).join('/')+'/';
 
     $(function() {    
@@ -21,7 +21,9 @@
         file    : "",
         settings: false,
         
-        init: function() {},
+        init: function() {
+            $.getScript(this.path+"UglifyJS/uglifyjs.js");
+        },
         
         //////////////////////////////////////////////////////////
         //
@@ -37,6 +39,8 @@
             var ext = this.getExtension(path);
             if (ext == "css") {
                 codiad.modal.load(300, this.path+"dialog.php");
+            } else if (ext == "js") {
+                this.uglify(path);
             }
         },
         
@@ -46,7 +50,6 @@
         //
 		//////////////////////////////////////////////////////////
         tidy: function() {
-            var _this = this;
             var color, fontw, bslash, last, compression;
             compression = $('#compression').val();
             color       = $('#compress_colors').val();
@@ -54,7 +57,7 @@
             bslash      = $('#remove_bslash').val();
             last        = $('#remove_last').val();
             codiad.modal.unload();
-            console.log($.post(this.path+"controller.php?action=tidyFile&path="+this.file,
+            $.post(this.path+"controller.php?action=compressCSS&path="+this.file,
                 {"compression": compression,"advanced": this.settings,"color": color, "fontw":fontw, "bslash": bslash, "last": last},
                 function(data){
                     data = JSON.parse(data);
@@ -64,7 +67,32 @@
                         codiad.message.success(data.message);
                         codiad.filemanager.rescan(codiad.project.getCurrent());
                     }
-            }));
+            });
+        },
+        
+        //////////////////////////////////////////////////////////
+        //
+        //  Use UglifyJS to compress file
+        //
+        //////////////////////////////////////////////////////////
+        uglify: function(path) {
+            var _this = this;
+            $.get(this.path+"controller.php?action=getContent&path="+path, function(code){
+                var ast = UglifyJS.parse(code);
+                ast.figure_out_scope();
+                ast.compute_char_frequency();
+                ast.mangle_names();
+                code = ast.print_to_string();
+                $.post(_this.path+"controller.php?action=compressJS&path="+path, {"code": code}, function(data){
+                    data = JSON.parse(data);
+                    if (data.status == "error") {
+                        codiad.message.error(data.message);
+                    } else {
+                        codiad.message.success(data.message);
+                        codiad.filemanager.rescan(codiad.project.getCurrent());
+                    }
+                });
+            });
         },
         
         //////////////////////////////////////////////////////////

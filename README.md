@@ -1,6 +1,6 @@
 #Compress
 
-Compress CSS files with CSSTidy through the filemanager of Codiad
+Compress CSS and Javascript files with CSSTidy and UglifyJS through the filemanager of Codiad
 
 ##Installation
 
@@ -10,3 +10,5 @@ Compress CSS files with CSSTidy through the filemanager of Codiad
 ##More Information
 
 [http://csstidy.sourceforge.net/](http://csstidy.sourceforge.net/ "CSSTidy")
+
+[http://lisperator.net/uglifyjs/](http://lisperator.net/uglifyjs/ "UglifyJS")
