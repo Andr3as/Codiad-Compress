@@ -9,6 +9,6 @@ Compress CSS and Javascript files with CSSTidy and UglifyJS through the filemana
 
 ##More Information
 
-[http://csstidy.sourceforge.net/](http://csstidy.sourceforge.net/ "CSSTidy")
+[CSSTidy](http://csstidy.sourceforge.net/ "CSSTidy")
 
-[http://lisperator.net/uglifyjs/](http://lisperator.net/uglifyjs/ "UglifyJS")
+[UglifyJS](http://lisperator.net/uglifyjs/ "UglifyJS")
