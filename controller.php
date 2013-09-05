@@ -11,13 +11,11 @@
     checkSession();
     error_reporting(0);
     
-    $localPath = "../../workspace/";
-    
     switch($_GET['action']) {
         
         case 'compressCSS':
             if (isset($_GET['path']) && isset($_POST['advanced'])) {
-                $path = $localPath . $_GET['path'];
+                $path = getWorkspacePath($_GET['path']);
                 $css_code = file_get_contents($path);
                 $css = new csstidy();
                 $css->parse($css_code);
@@ -42,7 +40,7 @@
             
         case 'compressJS':
             if (isset($_GET['path']) && isset($_POST['code'])) {
-                $path   = $localPath . $_GET['path'];
+                $path   = getWorkspacePath($_GET['path']);
                 $nFile  = substr($path, 0, strrpos($path, ".js"));
                 $nFile  = $nFile . ".min.js";
                 file_put_contents($nFile, $_POST['code']);
@@ -54,7 +52,7 @@
             
         case 'getContent':
             if (isset($_GET['path'])) {
-                echo file_get_contents($localPath.$_GET['path']);
+                echo file_get_contents(getWorkspacePath($_GET['path']));
             } else {
                 echo '{"status":"error","message":"Missing Parameter!"}';
             }
@@ -63,5 +61,21 @@
         default:
             echo '{"status":"error","message":"No Type"}';
             break;
+    }
+    
+    function getWorkspacePath($path) {
+        if (strpos($path, "/") == 0) {
+            //Unix absolute path
+            return $path;
+        }
+        if (strpos($path, ":/") !== false) {
+            //Windows absolute path
+            return $path;
+        }
+        if (strpos($path, ":\\") !== false) {
+            //Windows absolute path
+            return $path;
+        }
+        return "../../workspace/".$path;
     }
 ?>
