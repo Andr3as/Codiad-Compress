@@ -64,7 +64,7 @@
     }
     
     function getWorkspacePath($path) {
-        if (strpos($path, "/") == 0) {
+        if (strpos($path, "/") === 0) {
             //Unix absolute path
             return $path;
         }
