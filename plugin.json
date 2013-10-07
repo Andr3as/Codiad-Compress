@@ -1,14 +1,6 @@
 [{
     "author": "Andr3as",
-    "version": "0.22",
+    "version": "0.23",
     "name": "Compress",
-    "url": "https://github.com/Andr3as/Codiad-Compress.git",
-    "contextmenu": [
-        {
-            "action": "codiad.Compress.showDialog($('#context-menu').attr('data-path'));",
-            "icon": "icon-feather",
-            "applies-to": "file-only",
-            "title": "Compress"
-        }
-    ]
+    "url": "https://github.com/Andr3as/Codiad-Compress.git"
 }]

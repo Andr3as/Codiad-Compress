@@ -6,8 +6,8 @@
 
 (function(global, $){
 
-    //var codiad  = global.codiad,
-    var scripts = document.getElementsByTagName('script'),
+    var codiad  = global.codiad,
+        scripts = document.getElementsByTagName('script'),
         path    = scripts[scripts.length-1].src.split('?')[0],
         curpath = path.split('/').slice(0, -1).join('/')+'/';
 
@@ -22,18 +22,29 @@
         settings: false,
         
         init: function() {
+            var _this = this;
             $.getScript(this.path+"UglifyJS/uglifyjs.js");
+            amplify.subscribe("context-menu.onShow", function(obj){
+                var ext = _this.getExtension(obj.path);
+                if (ext == "css" || ext == "js") {
+                    $('#context-menu').append('<hr class="file-only compress">');
+                    $('#context-menu').append('<a class="file-only compress" onclick="codiad.Compress.contextMenu($(\'#context-menu\').attr(\'data-path\'));"><span class="icon-feather"></span>Compress</a>');
+                }
+            });
+            amplify.subscribe("context-menu.onHide", function(){
+                $('.compress').remove();
+            });
         },
         
         //////////////////////////////////////////////////////////
         //
         //  Show Dialog to use CSSTidy
         //
-		//  Parameters:
-		//
-		//  path - {String} - File path
-		//
-		//////////////////////////////////////////////////////////
+        //  Parameters:
+        //
+        //  path - {String} - File path
+        //
+        //////////////////////////////////////////////////////////
         showDialog: function(path) {
             this.file = path;
             var ext = this.getExtension(path);
@@ -46,9 +57,23 @@
         
         //////////////////////////////////////////////////////////
         //
+        //  Function called by the context menu
+        //
+        //  Parameters:
+        //
+        //  path - {String} - File path
+        //
+        //////////////////////////////////////////////////////////
+        contextMenu: function(path) {
+            codiad.filemanager.contextMenuHide();
+            this.showDialog(path);
+        },
+        
+        //////////////////////////////////////////////////////////
+        //
         //  Use CSSTidy to compress the file
         //
-		//////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////
         tidy: function() {
             var color, fontw, bslash, last, compression;
             compression = $('#compression').val();
@@ -121,10 +146,10 @@
         //  Get extension of the given file
         //
         //  Parameters:
-		//
-		//  path - {String} - File path
-		//
-		//////////////////////////////////////////////////////////
+        //
+        //  path - {String} - File path
+        //
+        //////////////////////////////////////////////////////////
         getExtension: function(path) {
             return path.substring(path.lastIndexOf(".")+1);
         }
