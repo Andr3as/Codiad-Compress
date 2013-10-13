@@ -13,6 +13,12 @@
     
     switch($_GET['action']) {
         
+        /**
+         * Compress a css file.
+         *
+         * @param {string} path The path of the file to compress
+         * @param {string} advanced Either advanced or standard_compression
+         */
         case 'compressCSS':
             if (isset($_GET['path']) && isset($_POST['advanced'])) {
                 $path = getWorkspacePath($_GET['path']);
