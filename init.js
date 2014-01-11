@@ -65,7 +65,6 @@
         //
         //////////////////////////////////////////////////////////
         contextMenu: function(path) {
-            codiad.filemanager.contextMenuHide();
             this.showDialog(path);
         },
         
