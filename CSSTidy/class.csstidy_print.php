@@ -204,6 +204,7 @@ class csstidy_print
             }
         }
 
+		$output = preg_replace('#@media ([a-zA-Z\-]*) ([a-zA-Z0-9]*){#', '@media($1:$2){', $output);
         $output = trim($output);
 
         if (!$plain) {
