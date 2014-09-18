@@ -24,122 +24,76 @@
         init: function() {
             var _this = this;
             $.getScript(this.path+"UglifyJS/uglifyjs.js");
+            $.getScript(this.path+"cssmin.js");
             amplify.subscribe("context-menu.onShow", function(obj){
                 var ext = _this.getExtension(obj.path);
                 if (ext == "css" || ext == "js") {
                     $('#context-menu').append('<hr class="file-only compress">');
-                    $('#context-menu').append('<a class="file-only compress" onclick="codiad.Compress.contextMenu($(\'#context-menu\').attr(\'data-path\'));"><span class="icon-feather"></span>Compress</a>');
+                    $('#context-menu').append('<a class="file-only compress" onclick="codiad.Compress.compress($(\'#context-menu\').attr(\'data-path\'));"><span class="icon-feather"></span>Compress</a>');
                 }
             });
             amplify.subscribe("context-menu.onHide", function(){
                 $('.compress').remove();
             });
         },
-        
+
         //////////////////////////////////////////////////////////
         //
-        //  Show Dialog to use CSSTidy
+        //  Compress code
         //
         //  Parameters:
         //
         //  path - {String} - File path
         //
         //////////////////////////////////////////////////////////
-        showDialog: function(path) {
+        compress: function(path) {
+            var _this = this;
             this.file = path;
             var ext = this.getExtension(path);
-            if (ext == "css") {
-                codiad.modal.load(300, this.path+"dialog.php");
-            } else if (ext == "js") {
-                this.uglify(path);
+            if (ext != "css" && ext != "js") {
+                return false;
             }
-        },
-        
-        //////////////////////////////////////////////////////////
-        //
-        //  Function called by the context menu
-        //
-        //  Parameters:
-        //
-        //  path - {String} - File path
-        //
-        //////////////////////////////////////////////////////////
-        contextMenu: function(path) {
-            this.showDialog(path);
-        },
-        
-        //////////////////////////////////////////////////////////
-        //
-        //  Use CSSTidy to compress the file
-        //
-        //////////////////////////////////////////////////////////
-        tidy: function() {
-            var color, fontw, bslash, last, compression;
-            compression = $('#compression').val();
-            color       = $('#compress_colors').val();
-            fontw       = $('#compress_font-weight').val();
-            bslash      = $('#remove_bslash').val();
-            last        = $('#remove_last').val();
-            codiad.modal.unload();
-            $.post(this.path+"controller.php?action=compressCSS&path="+this.file,
-                {"compression": compression,"advanced": this.settings,"color": color, "fontw":fontw, "bslash": bslash, "last": last},
-                function(data){
+            $.get(this.path+"controller.php?action=getContent&path="+path, function(code){
+                //Minify code
+                if (ext == "css") {
+                    code = _this.minify(code);
+                } else if (ext == "js") {
+                    code = _this.uglify(code);
+                }
+                $.post(_this.path+"controller.php?action=compress"+ext.toUpperCase()+"&path="+path, {"code": code}, function(data){
                     data = JSON.parse(data);
                     if (data.status == "error") {
                         codiad.message.error(data.message);
                     } else {
                         codiad.message.success(data.message);
-                        codiad.filemanager.rescan(codiad.project.getCurrent());
+                        codiad.filemanager.rescan($('#project-root').attr('data-path'));
                     }
+                });
             });
         },
-        
+
+        //////////////////////////////////////////////////////////
+        //
+        //  Use CSSmin to compress the file
+        //
+        //////////////////////////////////////////////////////////
+        minify: function(code) {
+            return YAHOO.compressor.cssmin(code);
+        },
+
         //////////////////////////////////////////////////////////
         //
         //  Use UglifyJS to compress file
         //
         //////////////////////////////////////////////////////////
-        uglify: function(path) {
-            var _this = this;
-            $.get(this.path+"controller.php?action=getContent&path="+path, function(code){
-                var ast = UglifyJS.parse(code);
-                ast.figure_out_scope();
-                ast.compute_char_frequency();
-                ast.mangle_names();
-                code = ast.print_to_string();
-                $.post(_this.path+"controller.php?action=compressJS&path="+path, {"code": code}, function(data){
-                    data = JSON.parse(data);
-                    if (data.status == "error") {
-                        codiad.message.error(data.message);
-                    } else {
-                        codiad.message.success(data.message);
-                        codiad.filemanager.rescan(codiad.project.getCurrent());
-                    }
-                });
-            });
+        uglify: function(code) {
+            var ast = UglifyJS.parse(code);
+            ast.figure_out_scope();
+            ast.compute_char_frequency();
+            ast.mangle_names();
+            return ast.print_to_string();
         },
-        
-        //////////////////////////////////////////////////////////
-        //
-        //  Show or hide advanced settings
-        //
-        //////////////////////////////////////////////////////////
-        showSettings: function() {
-            if (!this.settings) {
-                //Show advanced settings
-                this.settings = true;
-                $('#compress_settings').show();
-                $('#icon_settings').removeClass();
-                $('#icon_settings').addClass('icon-down-open-big');
-            } else {
-                //Hide settings
-                this.settings = false;
-                $('#compress_settings').hide();
-                $('#icon_settings').removeClass();
-                $('#icon_settings').addClass('icon-right-open-big');
-            }
-        },
-        
+
         //////////////////////////////////////////////////////////
         //
         //  Get extension of the given file
