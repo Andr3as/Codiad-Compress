@@ -35,6 +35,16 @@
             amplify.subscribe("context-menu.onHide", function(){
                 $('.compress').remove();
             });
+            amplify.subscribe('active.onOpen', function(path){
+                var manager = codiad.editor.getActive().commands;
+                manager.addCommand({
+                    name: 'Compress',
+                    bindKey: {win: 'Ctrl-Alt-C', mac: 'Command-Alt-C'},
+                    exec: function(e){
+                        codiad.Compress.compress(path);
+                    }
+                });
+            });
         },
 
         //////////////////////////////////////////////////////////
