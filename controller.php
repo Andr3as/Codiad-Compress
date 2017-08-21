@@ -26,7 +26,7 @@
                     $print  = "CSS";
                 } else {
                     $ext    = ".js";
-                    $pring  = "JS";
+                    $print  = "JS";
                 }
                 $path   = getWorkspacePath($_GET['path']);
                 $nFile  = substr($path, 0, strrpos($path, $ext));
