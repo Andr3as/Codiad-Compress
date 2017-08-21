@@ -23,8 +23,8 @@
         
         init: function() {
             var _this = this;
-            $.getScript(this.path+"UglifyJS/uglifyjs.js");
-            $.getScript(this.path+"cssmin.js");
+            $.getScript(this.path+"libs/uglifyjs.js");
+            $.getScript(this.path+"libs/cssmin.js");
             amplify.subscribe("context-menu.onShow", function(obj){
                 var ext = _this.getExtension(obj.path);
                 if (ext == "css" || ext == "js") {
