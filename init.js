@@ -97,11 +97,7 @@
         //
         //////////////////////////////////////////////////////////
         uglify: function(code) {
-            var ast = UglifyJS.parse(code);
-            ast.figure_out_scope();
-            ast.compute_char_frequency();
-            ast.mangle_names();
-            return ast.print_to_string();
+            return UglifyJS.minify(code);
         },
 
         //////////////////////////////////////////////////////////
