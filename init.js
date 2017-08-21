@@ -41,15 +41,25 @@
                     name: 'Compress',
                     bindKey: {win: 'Ctrl-Alt-C', mac: 'Command-Alt-C'},
                     exec: function(e){
-                        codiad.Compress.compress();
+                        _this.compress();
                     }
                 });
+            });
+            amplify.subscribe('active.onSave', function(path){
+                path = path || codiad.active.getPath();
+                var ext = _this.getExtension(path);
+                if (_this.compressOnSave() && _this.checkExtension(ext)) {
+                    var session = codiad.active.sessions[path];
+                    var content = session.getValue();
+                    content = _this.compressCode(ext, content);
+                    _this.saveCode(path, content);
+                }
             });
         },
 
         //////////////////////////////////////////////////////////
         //
-        //  Compress code
+        //  Handle code compression (get code, compress and save)
         //
         //  Parameters:
         //
@@ -64,17 +74,46 @@
             var _this = this;
             this.file = path;
             var ext = this.getExtension(path);
-            if (ext != "css" && ext != "js") {
+            if (!this.checkExtension(ext)) {
                 return false;
             }
             $.get(this.path+"controller.php?action=getContent&path="+path, function(code){
-                //Minify code
-                if (ext == "css") {
-                    code = _this.minify(code);
-                } else if (ext == "js") {
-                    code = _this.uglify(code);
-                }
-                $.post(_this.path+"controller.php?action=compress"+ext.toUpperCase()+"&path="+path, {"code": code}, function(data){
+                code = _this.compressCode(ext, code);
+                _this.saveCode(path, code);
+            });
+        },
+
+        //////////////////////////////////////////////////////////
+        //
+        //  Compress code
+        //
+        //  Parameters:
+        //
+        //  ext - {String} - File extension
+        //
+        //////////////////////////////////////////////////////////
+        compressCode: function(ext, code) {
+            //Minify code
+            if (ext == "css") {
+                return this.minify(code);
+            } else if (ext == "js") {
+                return this.uglify(code);
+            }
+        },
+
+        //////////////////////////////////////////////////////////
+        //
+        //  Save the compressed code
+        //
+        //  Parameters:
+        //
+        //  path - {String} - File path
+        //  code - {String} - Compressed code
+        //
+        //////////////////////////////////////////////////////////
+        saveCode: function(path, code) {
+            var ext = this.getExtension(path);
+            $.post(this.path+"controller.php?action=compress"+ext.toUpperCase()+"&path="+path, {"code": code}, function(data){
                     data = JSON.parse(data);
                     if (data.status == "error") {
                         codiad.message.error(data.message);
@@ -83,7 +122,6 @@
                         codiad.filemanager.rescan($('#project-root').attr('data-path'));
                     }
                 });
-            });
         },
 
         //////////////////////////////////////////////////////////
@@ -115,6 +153,28 @@
         //////////////////////////////////////////////////////////
         getExtension: function(path) {
             return path.substring(path.lastIndexOf(".")+1);
+        },
+
+        //////////////////////////////////////////////////////////
+        //
+        //  Check extension if minification works
+        //
+        //  Parameters:
+        //
+        //  ext - {String} - File extension
+        //
+        //////////////////////////////////////////////////////////
+        checkExtension: function(ext) {
+            return (ext == "css" || ext == "js");
+        },
+
+        //////////////////////////////////////////////////////////
+        //
+        //  Check wheater to compress file on save or not
+        //
+        //////////////////////////////////////////////////////////
+        compressOnSave: function() {
+            return false || localStorage.getItem('codiad.plugin.compress.compressOnSave') == "true";
         }
     };
 
