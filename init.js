@@ -41,7 +41,7 @@
                     name: 'Compress',
                     bindKey: {win: 'Ctrl-Alt-C', mac: 'Command-Alt-C'},
                     exec: function(e){
-                        codiad.Compress.compress(path);
+                        codiad.Compress.compress();
                     }
                 });
             });
@@ -57,6 +57,10 @@
         //
         //////////////////////////////////////////////////////////
         compress: function(path) {
+            if (typeof(path) == 'undefined') {
+                path = codiad.active.getPath();
+            }
+
             var _this = this;
             this.file = path;
             var ext = this.getExtension(path);
